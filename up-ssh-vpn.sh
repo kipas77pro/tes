@@ -27,7 +27,7 @@ wget -q -O /etc/pam.d/common-password "https://raw.githubusercontent.com/kipas77
 chmod +x /etc/pam.d/common-password
 
 # go to root
-cd /usr/local/sbin
+cd /root/
 
 clear 
 
@@ -59,6 +59,7 @@ systemctl start ws-stunnel >/dev/null 2>&1
 systemctl restart ws-stunnel >/dev/null 2>&1
 
 clear
+cd
 
 cat > /etc/systemd/system/rc-local.service <<-END
 [Unit]
