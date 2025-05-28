@@ -27,13 +27,30 @@ wget -q -O /etc/pam.d/common-password "https://raw.githubusercontent.com/kipas77
 chmod +x /etc/pam.d/common-password
 
 # go to root
-cd /root/
+file_path="/etc/handeling"
+
+# Cek apakah file ada
+if [ ! -f "$file_path" ]; then
+    # Jika file tidak ada, buat file dan isi dengan dua baris
+    echo -e "Satria Store\nGreen" | sudo tee "$file_path" > /dev/null
+    echo "File '$file_path' berhasil dibuat."
+else
+    # Jika file ada, cek apakah isinya kosong
+    if [ ! -s "$file_path" ]; then
+        # Jika file ada tetapi kosong, isi dengan dua baris
+        echo -e "Satria Store\nGreen" | sudo tee "$file_path" > /dev/null
+        echo "File '$file_path' kosong dan telah diisi."
+    else
+        # Jika file ada dan berisi data, tidak lakukan apapun
+        echo "File '$file_path' sudah ada dan berisi data."
+    fi
+fi
 
 clear 
 
 # Getting websocket ssl stunnel
-wget -q -O /usr/local/bin/ws-stunnel "https://raw.githubusercontent.com/kipas77pro/tunel/main/tools/ws-stunnel"
-chmod +x /usr/local/bin/ws-stunnel
+wget -q -O /usr/bin/ws-stunnel "https://raw.githubusercontent.com/kipas77pro/tunel/main/tools/ws-stunnel"
+chmod +x /usr/bin/ws-stunnel
 
 # Installing Service Ovpn Websocket
 cat > /etc/systemd/system/ws-stunnel.service << END
@@ -59,8 +76,11 @@ systemctl start ws-stunnel >/dev/null 2>&1
 systemctl restart ws-stunnel >/dev/null 2>&1
 
 clear
+# go to root
 cd
+apt install python3 -y
 
+# Edit file /etc/systemd/system/rc-local.service
 cat > /etc/systemd/system/rc-local.service <<-END
 [Unit]
 Description=/etc/rc.local
@@ -76,25 +96,20 @@ SysVStartPriority=99
 WantedBy=multi-user.target
 END
 
+# nano /etc/rc.local
 cat > /etc/rc.local <<-END
-
+#!/bin/sh -e
+# rc.local
+# By default this script does nothing.
 exit 0
 END
 
 # Ubah izin akses
 chmod +x /etc/rc.local
-echo -e "
-"
-date
-echo ""
+
 # enable rc local
-sleep 1
-echo -e "[ ${green}INFO${NC} ] Checking... "
-sleep 2
-sleep 1
-echo -e "[ ${green}INFO$NC ] Enable system rc local"
-systemctl enable rc-local >/dev/null 2>&1
-systemctl start rc-local.service >/dev/null 2>&1
+systemctl enable rc-local
+systemctl start rc-local.service
 
 # disable ipv6
 sleep 1
