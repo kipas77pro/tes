@@ -174,7 +174,7 @@ systemctl start ssh >/dev/null 2>&1
 systemctl restart ssh >/dev/null 2>&1
 
 # Install Stunnel5
-cd /root/
+cd /usr/bin
 wget -q "https://raw.githubusercontent.com/kipas77pro/tunel/main/tools/stunnel5.zip"
 unzip stunnel5.zip
 cd /root/stunnel
