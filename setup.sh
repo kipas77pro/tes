@@ -28,18 +28,92 @@ akbarvpnnnnnnnn="raw.githubusercontent.com/Arya-Blitar22/vps/main/backup"
 akbarvpnnnnnnnnn="raw.githubusercontent.com/Arya-Blitar22/vps/main/websocket"
 
 #echo "IP=" >> /var/lib/aryapro/ipvps.conf
-echo -e "[ ${GREEN}INFO$NC ] Download & Konfigurasi Domain"
-sleep 3
 clear
 clear && clear && clear
 clear;clear;clear
 echo -e "${YELLOW}-----------------------------------------------------${NC}"
 echo -e "Anda Ingin Menggunakan Domain Pribadi ?"
+echo -e "Atau Ingin Menggunakan Domain Otomatis ?"
+echo -e "Jika Ingin Menggunakan Domain Pribadi, Ketik ${GREEN}1${NC}"
+echo -e "dan Jika Ingin menggunakan Domain Otomatis, Ketik ${GREEN}2${NC}"
 echo -e "${YELLOW}-----------------------------------------------------${NC}"
 echo ""
-read -p "$( echo -e "${GREEN}Pilih 1 Tuk Domain Anda ? ${NC}(${YELLOW}1${NC})${NC} " )" choose_domain
+read -p "$( echo -e "${GREEN}Input Your Choose ? ${NC}(${YELLOW}1/2${NC})${NC} " )" choose_domain
 if [[ $choose_domain == "2" ]]; then # // Using Automatic Domain
+mkdir -p /usr/bin
+rm -fr /usr/local/bin/xray
+rm -fr /usr/local/bin/stunnel
+rm -fr /usr/local/bin/stunnel5
+rm -fr /etc/nginx
+rm -fr /var/lib/aryapro/
+rm -fr /usr/bin/xray
+rm -fr /etc/xray
+rm -fr /usr/local/etc/xray
+mkdir -p /etc/nginx
+mkdir -p /var/lib/aryapro/
+mkdir -p /usr/bin/xray
+mkdir -p /etc/xray
+mkdir -p /usr/local/etc/xray
+apt install jq curl -y
+rm -rf /root/xray/scdomain
+mkdir -p /root/xray
+clear
+echo ""
+read -rp "Input Domain Name. Example ( babi ): " -e sub
+DOMAIN=blitar-nbc-group.biz.id
+SUB_DOMAIN=${sub}.blitar-nbc-group.biz.id
+CF_ID=Afitamebel@gmail.com
+CF_KEY=c7892fc1afa8bb535a286b67deba8be60ecd8
+set -euo pipefail
+IP=$(curl -sS ifconfig.me);
+echo "Updating DNS for ${SUB_DOMAIN}..."
+ZONE=$(curl -sLX GET "https://api.cloudflare.com/client/v4/zones?name=${DOMAIN}&status=active" \
+-H "X-Auth-Email: ${CF_ID}" \
+-H "X-Auth-Key: ${CF_KEY}" \
+-H "Content-Type: application/json" | jq -r .result[0].id)
+RECORD=$(curl -sLX GET "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records?name=${SUB_DOMAIN}" \
+-H "X-Auth-Email: ${CF_ID}" \
+-H "X-Auth-Key: ${CF_KEY}" \
+-H "Content-Type: application/json" | jq -r .result[0].id)
+if [[ "${#RECORD}" -le 10 ]]; then
+RECORD=$(curl -sLX POST "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records" \
+-H "X-Auth-Email: ${CF_ID}" \
+-H "X-Auth-Key: ${CF_KEY}" \
+-H "Content-Type: application/json" \
+--data '{"type":"A","name":"'${SUB_DOMAIN}'","content":"'${IP}'","ttl":120,"proxied":false}' | jq -r .result.id)
+fi
+RESULT=$(curl -sLX PUT "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records/${RECORD}" \
+-H "X-Auth-Email: ${CF_ID}" \
+-H "X-Auth-Key: ${CF_KEY}" \
+-H "Content-Type: application/json" \
+--data '{"type":"A","name":"'${SUB_DOMAIN}'","content":"'${IP}'","ttl":120,"proxied":false}')
 
+echo "$SUB_DOMAIN" > /root/domain
+echo "$SUB_DOMAIN" > /root/scdomain
+echo "$SUB_DOMAIN" > /etc/xray/domain
+echo "$SUB_DOMAIN" > /etc/v2ray/domain
+echo "$SUB_DOMAIN" > /etc/xray/scdomain
+echo "IP=$SUB_DOMAIN" > /var/aryapro/ipvps.conf
+rm -rf cf
+sleep 1
+yellow "Domain added.."
+sleep 3
+domain=$(cat /root/domain)
+cp -r /root/domain /etc/xray/domain
+clear
+echo -e "[ ${GREEN}INFO${NC} ] Starting renew cert... "
+sleep 2
+echo -e "${OKEY} Starting Generating Certificate"
+rm -fr /root/.acme.sh
+mkdir -p /root/.acme.sh
+curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+chmod +x /root/.acme.sh/acme.sh
+/root/.acme.sh/acme.sh --upgrade
+/root/.acme.sh/acme.sh --upgrade --auto-upgrade
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+echo -e "${OKEY} Your Domain : $domain"
 sleep 2
 elif [[ $choose_domain == "1" ]]; then
 clear
@@ -56,8 +130,23 @@ echo ""
 read -p "Input Your Domain : " domain
 if [[ $domain == "" ]]; then
 clear
-
-clear
+echo -e "${EROR} No Input Detected !"
+exit 1
+fi
+mkdir -p /usr/bin
+rm -fr /usr/local/bin/xray
+rm -fr /usr/local/bin/stunnel
+rm -fr /usr/local/bin/stunnel5
+rm -fr /etc/nginx
+rm -fr /var/lib/aryapro/
+rm -fr /usr/bin/xray
+rm -fr /etc/xray
+rm -fr /usr/local/etc/xray
+mkdir -p /etc/nginx
+mkdir -p /var/lib/aryapro/
+mkdir -p /usr/bin/xray
+mkdir -p /etc/xray
+mkdir -p /usr/local/etc/xray
 echo "$domain" > /etc/${Auther}/domain.txt
 echo "IP=$domain" > /var/lib/aryapro/ipvps.conf
 echo "$domain" > /root/domain
